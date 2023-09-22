@@ -56,3 +56,4 @@ print('Точность на тестовых данных: %f' % (scores[1] * 1
 # plt.xlabel('X-axis')
 # plt.ylabel('Y-axis')
 # plt.show()
+print("Hello world")
