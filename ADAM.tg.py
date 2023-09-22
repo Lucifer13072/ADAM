@@ -1,9 +1,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-
 import matplotlib.pyplot as plt
-import tensorflow
 from tensorflow import keras
 from keras import layers
 import collections
@@ -16,12 +13,12 @@ import matplotlib.pyplot as plt
 from matplotlib import pylab
 from keras.preprocessing.sequence import pad_sequences
 import tensorflow as tf
-
-
+from itertools import zip_longest
 
 data = pd.read_csv('Models/dataset.csv')
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 np.random.seed(42)
-max_features = 5000
+max_features = 1000
 maxlen = 80
 
 model = keras.Sequential()
@@ -36,27 +33,28 @@ y_sequences = tokenizer.texts_to_sequences(y)
 x = pad_sequences(sequences, maxlen = maxlen)
 y = pad_sequences(y_sequences, maxlen = maxlen)
 
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=42)
 
-x_train = train_test_split(x, test_size=0.2, random_state=42)
-x_test = train_test_split(x, test_size=0.2, random_state=42)
-y_train = train_test_split(y, test_size=0.2, random_state=42)
-y_test = train_test_split(y, test_size=0.2, random_state=42)
- 
- 
- 
-model.add(layers.Embedding(input_dim=1500, output_dim=64))
-model.add(layers.LSTM(428, dropout = 0.2))
+# aligned_lists = zip_longest(x_train, y_train, fillvalue='00')
+# x_train, y_train = zip(*aligned_lists)
+
+# aligned_lists = zip_longest(x_test, y_test, fillvalue='00')
+# x_test, y_test = zip(*aligned_lists)
+
+#ИЛИ
+
+x_train = sequence.pad_sequences(x_train, maxlen = maxlen)
+x_test = sequence.pad_sequences(x_test, maxlen = maxlen)
+
+model.add(layers.Embedding(input_dim=1000, output_dim=64))
+model.add(layers.LSTM(240, dropout = 0.2))
 model.add(layers.Dense(120, activation='relu'))
-model.add(layers.Dense(520, activation='relu'))
 model.add(layers.Dense(120, activation='softmax'))
+#Seq2Seq
 
-model.compile(optimizer='adam',
-              loss='sparse_categorical_crossentropy',
+model.compile(loss = 'binary_crossentropy',
+              optimizer='adam',
               metrics=['accuracy'])
-
-x_test = np.stack(x_train, axis=0)
-y_test = np.stack(y_train, axis=0)
-
 
 model.fit(x_train, y_train, 
            batch_size = 64,
@@ -64,10 +62,9 @@ model.fit(x_train, y_train,
            validation_data = (x_test, y_test),
            verbose = 1)
 
-scores = model.evaluate(X_test, y_test, batch_size = 64)
-print('Точность на тестовых данных: %f' % (scores[1] * 100))
-
-plt.plot(scores, 0)
-plt.xlabel('X-axis')
-plt.ylabel('Y-axis')
-plt.show()
+# scores = model.evaluate(x_test, y_test, batch_size = 64)
+# print('Точность на тестовых данных: %f' % (scores[1] * 100))
+# plt.plot(scores, 0)
+# plt.xlabel('X-axis')
+# plt.ylabel('Y-axis')
+# plt.show()
