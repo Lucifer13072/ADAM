@@ -7,9 +7,11 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from keras.preprocessing.sequence import pad_sequences
 import tensorflow as tf
+from datetime import date
 
 data = pd.read_csv('Models/dataset.csv')
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+dt_now = date.today()
 np.random.seed(42)
 max_features = 1000
 maxlen = 80
@@ -52,3 +54,5 @@ model.fit(x_train, y_train,
 
 scores = model.evaluate(x_test, y_test, batch_size = 64)
 print('Точность на тестовых данных: %f' % (scores[1] * 100))
+model.save(f'Out/Out_model_{dt_now}.h5')
+print('Модель успешно сохранена!')
