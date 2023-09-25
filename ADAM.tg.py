@@ -1,5 +1,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 from tensorflow import keras
 from keras import layers
 import numpy as np
@@ -10,7 +11,6 @@ import tensorflow as tf
 from datetime import date
 
 data = pd.read_csv('Models/dataset.csv')
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 dt_now = date.today()
 np.random.seed(42)
 max_features = 1000
@@ -48,7 +48,7 @@ x_test = np.asarray(x_test).astype('float32').reshape((-1,1))
 
 model.fit(x_train, y_train, 
            batch_size = 64,
-           epochs = 12,
+           epochs = 13,
            validation_data = (x_test, y_test),
            verbose = 1)
 
@@ -56,3 +56,58 @@ scores = model.evaluate(x_test, y_test, batch_size = 64)
 print('Точность на тестовых данных: %f' % (scores[1] * 100))
 model.save(f'Out/Out_model_{dt_now}.h5')
 print('Модель успешно сохранена!')
+
+model_loaded = keras.models.load_model('Out/Out_model_2023-09-25.h5')
+print(model_loaded)
+
+class NeuralNetwork(tf.keras.Model):
+    def __init__(self, units):
+        super().__init__()
+        self.units = units
+        self.model_layers = [layers.Dense(n, activation='relu') for n in self.units]
+ 
+    def call(self, inputs):
+        x = inputs
+        for layer in self.model_layers:
+            x = layer(x)
+        return x
+
+model = NeuralNetwork([128, 10])
+y = model.predict(tf.expand_dims(x_test[0], axis=0))
+model.save('out/16_model')
+model_loaded = keras.models.load_model('out/16_model')
+y = model_loaded.predict(tf.expand_dims(x_test[0], axis=0))
+
+class NeuralNetworkLinear(tf.keras.Model):
+    def __init__(self, units):
+        super().__init__()
+        self.units = units
+        self.model_layers = [layers.Dense(n, activation='linear') for n in self.units]
+ 
+    def call(self, inputs):
+        x = inputs
+        for layer in self.model_layers:
+            x = layer(x)
+        return x
+    
+model_loaded = keras.models.load_model('out/16_model', custom_objects={"NeuralNetwork": NeuralNetworkLinear})
+
+def get_config(self):
+        return {'units': self.units}
+ 
+@classmethod
+def from_config(cls, config):
+        return cls(**config)
+
+config = model.get_config()
+model = NeuralNetwork([128, 10])
+model2 = NeuralNetwork([128, 10])
+y = model.predict(tf.expand_dims(x_test[0], axis=0))
+y = model2.predict(tf.expand_dims(x_test[0], axis=0))
+weights = model.get_weights()
+model2.set_weights(weights)
+y = model2.predict(tf.expand_dims(x_test[0], axis=0))
+model.save_weights('out/model_weights')
+model2.load_weights('out/model_weights')
+model.save_weights('out/model_weights.h5')
+model2.load_weights('out/model_weights.h5')
