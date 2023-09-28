@@ -13,8 +13,8 @@ data = pd.read_csv('Models/dataset.csv')
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 dt_now = date.today()
 np.random.seed(42)
-max_features = 1000
-maxlen = 80
+max_features = 1500
+maxlen = 250
 
 x = data['Вопрос']
 y = data['Ответ']
@@ -31,9 +31,9 @@ x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_
 model = keras.Sequential()
 
 model.add(layers.Embedding(input_dim = max_features, output_dim=64))
-model.add(layers.LSTM(240, dropout = 0.2))
-model.add(layers.Dense(120, activation='relu'))
-model.add(layers.Dense(120, activation='softmax'))
+model.add(layers.LSTM(1240, dropout = 0.2))
+model.add(layers.Dense(540, activation='relu'))
+model.add(layers.Dense(540, activation='softmax'))
 tf.keras.layers.Dense(1, activation="sigmoid")
 #Seq2Seq
 
