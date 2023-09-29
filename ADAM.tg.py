@@ -31,9 +31,9 @@ x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_
 model = keras.Sequential()
 
 model.add(layers.Embedding(input_dim = max_features, output_dim=64))
-model.add(layers.LSTM(1240, dropout = 0.2))
+model.add(layers.LSTM(540, dropout = 0.2))
 model.add(layers.Dense(540, activation='relu'))
-model.add(layers.Dense(540, activation='softmax'))
+model.add(layers.Dense(1540, activation='softmax'))
 tf.keras.layers.Dense(1, activation="sigmoid")
 #Seq2Seq
 
