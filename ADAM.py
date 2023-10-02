@@ -1,4 +1,4 @@
-
+from __future__ import absolute_import, division, print_function, unicode_literals
 import os
 import numpy as np
 import pandas as pd
@@ -30,32 +30,36 @@ y = pad_sequences(y_sequences, maxlen = maxlen)
 x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=42)
 
 model = keras.Sequential()
-model.add(layers.Embedding(input_dim = 155000, output_dim=64))
-model.add(layers.LSTM(512, dropout = 0.2))
+
+model.add(layers.Embedding(max_features, 64, input_length=maxlen))
+# model.add(layers.Dropout(0.2))
+# model.add(layers.Conv1D(64, 5, activation='relu'))
+# model.add(layers.MaxPooling1D(pool_size=4))
+model.add(layers.LSTM(240))
+model.add(layers.Dense(64, activation='relu'))
 model.add(layers.Dense(350, activation='softmax'))
+tf.keras.layers.Dense(1, activation="sigmoid")
+
 #Seq2Seq
 
 model.compile(loss = 'categorical_crossentropy',
               optimizer='adam',
               metrics=['accuracy'])
 
-model.summary()
-
 model.fit(x_train, y_train, 
            batch_size = 64,
-           epochs = 5,
+           epochs = 128,
            validation_data = (x_test, y_test))
 
-max_seq_length = max(len(seq) for seq in sequences + y_sequences)
+max_seq_length = max(len(seq) for seq in x + y)
 vocab_size = len(tokenizer.word_index) + 1
 metadata = {
 'tokenizer': tokenizer,
-'max_seq_length': maxlen,
+'max_seq_length': max_seq_length,
 'vocab_size': vocab_size
 }
 
 model.summary()
-
 scores = model.evaluate(x_test, y_test, batch_size = 64)
 print('Точность на тестовых данных: %f' % (scores[1] * 100))
 model.save(f'Out/Out_model_{dt_now}.h5')
