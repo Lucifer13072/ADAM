@@ -3,6 +3,7 @@ import os
 import numpy as np
 import pandas as pd
 import tensorflow as tf
+import configparser
 from tensorflow import keras
 from keras import layers
 from sklearn.model_selection import train_test_split
@@ -10,12 +11,19 @@ from keras.preprocessing.sequence import pad_sequences
 from keras.preprocessing.text import Tokenizer
 from datetime import date
 
-data = pd.read_csv('Models/dataset.csv')
+config = configparser.ConfigParser()
+config.read("settings.ini")
+
+data = pd.read_csv(config["ADAM"]["model"])
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-dt_now = date.today()
-np.random.seed(42)
-max_features = 155000
-maxlen = 350
+np.random.seed(int(config['ADAM']['seed']))
+max_features = int(config['ADAM']['max_features'])
+maxlen = int(config['ADAM']['maxlen'])
+if config['ADAM']['dt_now'] == 'True' and 'true':
+    dt_now = date.today()
+    print(dt_now)
+else:
+    dt_now = ''
 
 x = data['Вопрос']
 y = data['Ответ']
@@ -35,11 +43,9 @@ model.add(layers.Embedding(max_features, 64, input_length=maxlen))
 model.add(layers.Dropout(0.2))
 model.add(layers.Conv1D(64, 5, activation='relu'))
 model.add(layers.MaxPooling1D(pool_size=4))
-model.add(layers.LSTM(240))
-model.add(layers.Dense(64, activation='relu'))
+model.add(layers.LSTM(int(config['ADAM']['LSTM'])))
+model.add(layers.Dense(350, activation='relu'))
 model.add(layers.Dense(350, activation='softmax'))
-tf.keras.layers.Dense(1, activation="sigmoid")
-
 #Seq2Seq
 
 model.compile(loss = 'categorical_crossentropy',
@@ -48,7 +54,7 @@ model.compile(loss = 'categorical_crossentropy',
 
 model.fit(x_train, y_train, 
            batch_size = 64,
-           epochs = 128,
+           epochs = int(config["ADAM"]["epochs"]),
            validation_data = (x_test, y_test))
 
 max_seq_length = max(len(seq) for seq in x + y)
@@ -62,6 +68,10 @@ metadata = {
 model.summary()
 scores = model.evaluate(x_test, y_test, batch_size = 64)
 print('Точность на тестовых данных: %f' % (scores[1] * 100))
-model.save(f'Out/Out_model_{dt_now}.h5')
-np.save(f'Out/metadata_{dt_now}.npy', metadata)
-print('Модель успешно сохранена!')
+if config["ADAM"]["save_model"] == 'True' and 'true':
+    model.save(f'Out/Out_model_{dt_now}.h5')
+    np.save(f'Out/metadata_{dt_now}.npy', metadata)
+    print('Модель успешно сохранена!')
+else:
+    print('Модель обучена и не сохранена')
+    input()

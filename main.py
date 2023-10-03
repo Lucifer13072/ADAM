@@ -3,15 +3,17 @@ import tensorflow as tf
 import numpy as np
 import string
 import nltk
-import stt
-import tts
+import configparser
 from datetime import date
 from keras.preprocessing.sequence import pad_sequences
 from nltk.stem import WordNetLemmatizer
 from nltk.corpus import stopwords
 
+config = configparser.ConfigParser()
+config.read("settings.ini")
+
 dt_now = date.today()
-np.random.seed(42)
+np.random.seed(int(config['ADAM']['seed']))
 
 # Загрузка обученной модели
 model = tf.keras.models.load_model(f'Out/Out_model_{dt_now}.h5')
@@ -50,7 +52,7 @@ def predict_answer(model, tokenizer, question):
     answer = tokenizer.index_word[idx]
     return answer
 
-while input() == "":
+while True:
     question = input('Вопрос: ')
     answer = predict_answer(model, tokenizer, question)
     print('Ответ:', answer)
