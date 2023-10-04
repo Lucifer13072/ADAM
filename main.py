@@ -4,6 +4,7 @@ import numpy as np
 import string
 import nltk
 import configparser
+import stt
 from datetime import date
 from keras.preprocessing.sequence import pad_sequences
 from nltk.stem import WordNetLemmatizer
@@ -52,15 +53,9 @@ def predict_answer(model, tokenizer, question):
     answer = tokenizer.index_word[idx]
     return answer
 
-while True:
-    question = input('Вопрос: ')
-    answer = predict_answer(model, tokenizer, question)
+def va_respond(voice: str):
+    print(voice)
+    answer = predict_answer(model, tokenizer, voice)
     print('Ответ:', answer)
 
-# question = input('Вопрос: ')
-# question_tokens = tokenizer.texts_to_sequences([question])
-# question_tokens = pad_sequences(question_tokens, maxlen=max_length)
-# answer_tokens = model.predict(question_tokens) # Получение ответа от модели
-# answer = tokenizer.sequences_to_texts(answer_tokens)[0] # Преобразование ответа в текст
-# print("Вопрос:", question)
-# print("Ответ:", answer)
+stt.va_listen(va_respond)

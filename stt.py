@@ -3,10 +3,14 @@ import sys
 import sounddevice as sd
 import queue
 import json
+import configparser
 
-model = vosk.Model("Models/vosk-model-small-ru-0.22") #Как временая модель
-samplerate = 16000
-device = 1
+config = configparser.ConfigParser()
+config.read("settings.ini")
+
+model = vosk.Model(config['Audio']['model_in'])
+samplerate = int(config['Audio']['samplerate'])
+device = int(config['Audio']['audio_in'])
 
 q = queue.Queue()
 

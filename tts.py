@@ -1,34 +1,47 @@
-
-
-
-#НЕ РАБОТАЕТ
-#В ПРОЦЕССЕ СОЗДАНИЯ
-
-
-
+import numpy as np
+import soundfile as sf
+import yaml
 import tensorflow as tf
-from tensorflow import keras
-from keras.layers import Input, LSTM, Dense
-from keras.models import Model
+import configparser
+from tensorflow_tts.inference import TFAutoModel
+from tensorflow_tts.inference import AutoProcessor
 
-# Задаем параметры модели
-input_dim = 100 # Размерность входного вектора (размерность эмбеддинга текста)
-hidden_units = 256 # Количество скрытых единиц LSTM
-output_dim = 1 # Размерность выходного вектора (одно число - озвученный тембр)
+config = configparser.ConfigParser()
+config.read("settings.ini")
 
-# Определяем архитектуру модели
-inputs = Input(shape=(None, input_dim)) # Входной слой - переменная длина последовательности
-lstm = LSTM(hidden_units, return_sequences=True)(inputs) # Слой LSTM
-outputs = Dense(output_dim, activation='sigmoid')(lstm) # Выходной слой с одним выходом
+# initialize fastspeech2 model.
+fastspeech2 = TFAutoModel.from_pretrained("tensorspeech/tts-fastspeech2-ljspeech-en")
 
-# Создаем модель
-model = Model(inputs=inputs, outputs=outputs)
+# initialize mb_melgan model
+mb_melgan = TFAutoModel.from_pretrained("tensorspeech/tts-mb_melgan-ljspeech-en")
 
-# Компилируем модель
-model.compile(optimizer='adam', loss='mse')
+# inference
+processor = AutoProcessor.from_pretrained("tensorspeech/tts-fastspeech2-ljspeech-en")
 
-# Обучаем модель
-model.fit(X_train, y_train, epochs=10, batch_size=32)
+input_ids = processor.text_to_sequence("Recent research at Harvard has shown meditating for as little as 8 weeks, can actually increase the grey matter in the parts of the brain responsible for emotional regulation, and learning.")
 
-# Используем обученную модель для генерации озвученного текста
-predictions = model.predict(X_test)
+# fastspeech inference
+mel_before, mel_after, duration_outputs, _, _ = fastspeech2.inference(
+    input_ids=tf.expand_dims(tf.convert_to_tensor(input_ids, dtype=tf.int32), 0),
+    speaker_ids=tf.convert_to_tensor([0], dtype=tf.int32),
+    speed_ratios=tf.convert_to_tensor([1.0], dtype=tf.float32),
+    f0_ratios =tf.convert_to_tensor([1.0], dtype=tf.float32),
+    energy_ratios =tf.convert_to_tensor([1.0], dtype=tf.float32),
+)
+
+# melgan inference
+audio_before = mb_melgan.inference(mel_before)[0, :, 0]
+audio_after = mb_melgan.inference(mel_after)[0, :, 0]
+
+# save to file
+sf.write('temp/audio_before.wav', audio_before, 22050, "PCM_16")
+sf.write('temp/audio_after.wav', audio_after, 22050, "PCM_16")
+
+
+
+
+
+
+
+
+# https://github.com/TensorSpeech/TensorFlowTTS
