@@ -1,7 +1,0 @@
-*.wav
-__pycache__/
-tempCodeRunnerFile.py
-Out_model_*.h5
-Out/
-.DS_Store
-test.py
