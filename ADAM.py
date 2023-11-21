@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 batch_size = 64
-epochs = 100 #оптимально 13
+epochs = 10 #оптимально 54
 latent_dim = 256
 num_samples = 10000
 
@@ -97,4 +97,5 @@ model.fit([encoder_input_data, decoder_input_data],
           epochs=epochs, 
           validation_split=0.2)
 
-model.save('model/Eva1.0.h5')
+model.summary()
+model.save('model/Eva1_0.h5')
