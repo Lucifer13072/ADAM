@@ -1,46 +1,34 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
-import tensorflow as tf
+from keras.models import load_model
 import numpy as np
-import string
-import nltk
-from nltk import stem
-from nltk import corpus
-import configparser
-from datetime import date
-from keras.preprocessing.sequence import pad_sequences
-from nltk.stem import WordNetLemmatizer
-from nltk.corpus import stopwords
+import ADAM
+# Загрузка модели
+model = load_model('model/Eva1.0.h5')
 
+# Функция для генерации ответа
+def generate_response(input_text):
+    # Преобразование входного текста в вектор
+    encoder_input = np.zeros((1, ADAM.max_encoder_seq_length, ADAM.num_encoder_tokens))
+    for t, char in enumerate(input_text):
+        if char in ADAM.input_token_index:
+            encoder_input[0, t, ADAM.input_token_index[char]] = 1.0
+    
+    # Генерация ответа с помощью модели
+    decoder_input = np.zeros((1, ADAM.max_decoder_seq_length, ADAM.num_decoder_tokens))
+    decoder_input[0, 0, ADAM.target_token_index['\t']] = 1.0
+    output_text = ''
+    for t in range(ADAM.max_decoder_seq_length):
+        outputs = model.predict([encoder_input, decoder_input])
+        output_token_index = np.argmax(outputs[0, t, :])
+        output_char = ADAM.target_characters[output_token_index]
+        output_text += output_char
+        if output_char == '\n':
+            break
+        decoder_input[0, t+1, output_token_index] = 1.0
+    
+    return output_text
 
-# Загрузка обученной модели
-model = tf.keras.models.load_model(f'Out/model.h5')
-metadata = np.load(f'Out/metadata.npy', allow_pickle=True).item()
-model.summary()
-
-# Загрузка метаданных из модели
-tokenizer = metadata['tokenizer']
-max_length = metadata['max_seq_length']
-
-def preprocess(data):
-    tokens = nltk.word_tokenize(data)
-    tokens = [word.lower() for word in tokens]
-    stop_words = set(stopwords.words('russian'))
-    tokens = [word for word in tokens if word not in stop_words and word not in string.punctuation] 
-    lemmatizer = WordNetLemmatizer()
-    tokens = [lemmatizer.lemmatize(word) for word in tokens]
-    return tokens
-
-def predict_answer(model, tokenizer, question):
-    question = preprocess(question)
-    sequence = tokenizer.texts_to_sequences([question])
-    padded_sequence = pad_sequences(sequence, maxlen=max_length)
-
-    pred = model.predict(padded_sequence)[0]
-    idx = np.argmax(pred)
-    answer = tokenizer.index_word[idx]
-    return answer
-
+# Пример использования
 while True:
-    question = input("Вопрос: ")
-    answer = predict_answer(model, tokenizer, question)
-    print('Ответ:', answer)
+    question = input("Пользователь: ")
+    response = generate_response(question)
+    print("ЕВА:", response)
