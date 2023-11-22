@@ -8,7 +8,7 @@ from keras.models import Model
 from keras.layers import Input, LSTM, Dense
 
 # Чтение файла и загрузка данных
-with open('dataset/dataset.json', 'r') as f:
+with open('dataset/dataset.json', 'r', encoding='utf-8') as f:
     data = json.load(f)
 
 # Подготовка входных и выходных данных
@@ -89,4 +89,4 @@ model.fit(
 )
 
 # Сохранение модели на диск
-model.save('EVA_model.h5')
+model.save('model/EVA_model.h5')
