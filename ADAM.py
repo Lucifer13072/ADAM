@@ -90,3 +90,20 @@ model.fit(
 
 # Сохранение модели на диск
 model.save('model/EVA_model.h5')
+
+import pickle
+
+# Сохранение модели на диск
+model.save('model/EVA_model.h5')
+
+required_data = {
+    'num_decoder_tokens': num_decoder_tokens,
+    'max_decoder_seq_length': max_decoder_seq_length,
+    'latent_dim': latent_dim,
+    'input_token_index': input_token_index,
+    'target_token_index': target_token_index,
+    'reverse_target_char_index': reverse_target_char_index
+}
+
+with open('model/required_data.pkl', 'wb') as f:
+    pickle.dump(required_data, f)
