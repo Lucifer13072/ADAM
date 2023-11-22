@@ -23,8 +23,8 @@ import numpy as np
 import json
 
 # Загрузка датасета из файла
-with open('dataset/dataset.json', 'r') as file:
-    dataset = json.load(file)
+with open('dataset/dataset.json', 'r', encoding="utf-8") as file:
+    dataset = json.loads(file.read())
 
 # Создание словарей для преобразования текста в числовой формат
 input_texts = []
