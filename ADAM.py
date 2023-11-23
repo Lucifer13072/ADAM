@@ -78,7 +78,7 @@ model = Model([encoder_inputs, decoder_inputs], decoder_outputs)
 model.compile(optimizer='rmsprop', loss='categorical_crossentropy')
 
 # Обучение модели
-epochs = 50
+epochs = 100
 batch_size = 64
 model.fit(
     [encoder_input_data, decoder_input_data],
