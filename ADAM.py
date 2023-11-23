@@ -9,7 +9,7 @@ from keras.layers import Input, LSTM, Dense
 
 # Чтение файла и загрузка данных
 with open('dataset/dataset.json', 'r', encoding='utf-8') as f:
-    data = json.load(f)
+    data = json.loads(f.read(), strict=False)
 
 # Подготовка входных и выходных данных
 input_texts = []
