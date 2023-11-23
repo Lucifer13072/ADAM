@@ -75,7 +75,7 @@ decoder_outputs = decoder_dense(decoder_outputs)
 model = Model([encoder_inputs, decoder_inputs], decoder_outputs)
 
 # Компиляция модели
-model.compile(optimizer='rmsprop', loss='categorical_crossentropy')
+model.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=['accuracy'])
 
 # Обучение модели
 epochs = 50
@@ -107,3 +107,9 @@ required_data = {
 
 with open('model/required_data.pkl', 'wb') as f:
     pickle.dump(required_data, f)
+
+print("Input tokens:")
+print(input_token_index)
+
+print("Target tokens:")
+print(target_token_index)
