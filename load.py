@@ -93,14 +93,14 @@ while True:
 
     # Подготовка входного текста
     input_seq = np.zeros((1, max_encoder_seq_length, num_encoder_tokens), dtype='float32')
-
+    print(input_seq)
     # check that characters in input_text are all in input_token_index
-    for t, char in enumerate(input_text):
-        if char in input_token_index:
-            input_seq[0, t, input_token_index[char]] = 1.
-        else:
-            print(f"Character {char} not recognized by the model.")
-            break
+    # for t, char in enumerate(input_text):
+    #     if char in input_token_index:
+    #         input_seq[0, t, input_token_index[char]] = 1
+    #     else:
+    #         print(f"Character {char} not recognized by the model.")
+    #         break
 
     # Декодирование входного текста
     decoded_sentence = decode_sequence(input_seq)

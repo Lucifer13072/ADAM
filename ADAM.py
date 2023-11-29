@@ -6,6 +6,7 @@ import json
 import numpy as np
 from keras.models import Model
 from keras.layers import Input, LSTM, Dense
+import pickle
 
 # Чтение файла и загрузка данных
 with open('dataset/dataset.json', 'r', encoding='utf-8') as f:
@@ -26,13 +27,17 @@ for line in data:
 
     for char in input_text:
         if char not in input_characters:
+            print(f"Adding {repr(char)} to input_characters")
             input_characters.add(char)
+            
 
     for char in target_text:
         if char not in target_characters:
+            print(f"Adding {repr(char)} to target_characters")
             target_characters.add(char)
 
-# Получение числа уникальных токенов и максимальной длины входных и выходных последовательностей
+input_characters = sorted(list(input_characters))
+target_characters = sorted(list(target_characters))
 num_encoder_tokens = len(input_characters)
 num_decoder_tokens = len(target_characters)
 max_encoder_seq_length = max([len(txt) for txt in input_texts])
@@ -78,7 +83,7 @@ model = Model([encoder_inputs, decoder_inputs], decoder_outputs)
 model.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=['accuracy'])
 
 # Обучение модели
-epochs = 100
+epochs = 50
 batch_size = 64
 model.fit(
     [encoder_input_data, decoder_input_data],
@@ -91,7 +96,7 @@ model.fit(
 # Сохранение модели на диск
 model.save('model/EVA_model.h5')
 
-import pickle
+
 
 # Сохранение модели на диск
 model.save('model/EVA_model.h5')
