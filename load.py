@@ -2,11 +2,12 @@ import numpy as np
 import pickle
 from keras.models import load_model, Model
 from keras.layers import Input
+import json
 
 
 # Загрузка необходимых данных
-with open('model/required_data.pkl', 'rb') as f:
-    required_data = pickle.load(f)
+with open('model/required_data.json', 'rb', encoding='utf-8') as f:
+    required_data = json.load(f)
 
 num_decoder_tokens = required_data['num_decoder_tokens']
 max_decoder_seq_length = required_data['max_decoder_seq_length']

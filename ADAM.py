@@ -82,7 +82,7 @@ model = Model([encoder_inputs, decoder_inputs], decoder_outputs)
 model.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=['accuracy'])
 
 # Обучение модели
-epochs = 150
+epochs = 10
 batch_size = 64
 model.fit(
     [encoder_input_data, decoder_input_data],
@@ -94,8 +94,6 @@ model.fit(
 
 # Сохранение модели на диск
 model.save('model/EVA_model.h5')
-
-import pickle
 
 # Сохранение модели на диск
 model.save('model/EVA_model.h5')
@@ -109,8 +107,8 @@ required_data = {
     'reverse_target_char_index': reverse_target_char_index
 }
 
-with open('model/required_data.pkl', 'wb') as f:
-    pickle.dump(required_data, f)
+with open('model/required_data.json', 'wb') as f:
+    f.write(json.dumps(required_data))
 
 print("Input tokens:")
 print(input_token_index)
