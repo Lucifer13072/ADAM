@@ -28,6 +28,7 @@ for line in data:
         if char not in input_characters:
             print(f"Adding {repr(char)} to input_characters")
             input_characters.add(char)
+        
             
 
     for char in target_text:
@@ -107,8 +108,8 @@ required_data = {
     'reverse_target_char_index': reverse_target_char_index
 }
 
-with open('model/required_data.json', 'wb') as f:
-    f.write(json.dumps(required_data))
+with open('model/required_data.json', 'w', encoding='utf-8') as f:
+    json.dump(required_data, f, ensure_ascii=False, indent=4)
 
 print("Input tokens:")
 print(input_token_index)

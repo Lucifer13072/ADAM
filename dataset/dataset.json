@@ -1099,5 +1099,41 @@
  {
   "Вопрос": "И что такое ускорение?",
  "Ответ": "Ускорение (a) в кинематике - это изменение скорости объекта в единицу времени. Можно выразить ускорение как отношение изменения скорости (Δv) к изменению времени (Δt): a = Δv / Δt."
- }
+ },
+ {
+    "Вопрос": "What's the largest organ in the human body?",
+    "Ответ": "The largest organ in the human body is the skin."
+  },
+  {
+    "Вопрос": "Who discovered gravity?",
+    "Ответ": "Gravity was discovered by Sir Isaac Newton."
+  },
+  {
+    "Вопрос": "Do you know the boiling point of water in Celsius?",
+    "Ответ": "The boiling point of water in Celsius is 100 degrees Celsius."
+  },
+  {
+    "Вопрос": "Who painted the famous artwork 'Starry Night'?",
+    "Ответ": "'Starry Night' was painted by Vincent van Gogh."
+  },
+  {
+    "Вопрос": "What's the currency of Japan?",
+    "Ответ": "The currency of Japan is the Japanese yen."
+  },
+  {
+    "Вопрос": "Which element has the chemical symbol Fe?",
+    "Ответ": "Iron is represented by the chemical symbol Fe."
+  },
+  {
+    "Вопрос": "Who composed the 'Moonlight Sonata'?",
+    "Ответ": "The 'Moonlight Sonata' was composed by Ludwig van Beethoven."
+  },
+  {
+    "Вопрос": "What is the capital of Brazil?",
+    "Ответ": "The capital of Brazil is Brasília."
+  },
+  {
+    "Вопрос": "Who wrote the novel 'Pride and Prejudice'?",
+    "Ответ": "'Pride and Prejudice' was written by Jane Austen."
+  }
 ]
