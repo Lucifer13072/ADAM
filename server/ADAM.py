@@ -93,7 +93,7 @@ model.fit(
 )
 
 # Сохранение модели на диск
-model.save('model/EVA_model.h5')
+model.save('../client/model/EVA_model.h5')
 
 # Сохранение модели на диск
 import pickle
@@ -107,7 +107,7 @@ required_data = {
     'reverse_target_char_index': reverse_target_char_index
 }
 
-with open('model/required_data.json', 'wb') as f:
+with open('../client/model/required_data.json', 'wb') as f:
     f.write(json.dumps(required_data))
 
 print("Input tokens:")

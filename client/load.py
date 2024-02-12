@@ -18,3 +18,6 @@ reverse_target_char_index = required_data['reverse_target_char_index']
 # Загрузка модели
 model = load_model('model/EVA_model.h5')
 
+def answer(text):
+    answer_txt = text + " 123"
+    return answer_txt
