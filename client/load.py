@@ -5,7 +5,7 @@ import numpy as np
 import json
 
 # Загрузка необходимых данных
-with open('model/required_data.json', 'r', encoding='utf-8') as f:
+with open('client/model/required_data.json', 'r', encoding='utf-8') as f:
     required_data = json.load(f)
 
 num_decoder_tokens = required_data['num_decoder_tokens']
@@ -16,8 +16,11 @@ target_token_index = required_data['target_token_index']
 reverse_target_char_index = required_data['reverse_target_char_index']
 
 # Загрузка модели
-model = load_model('model/EVA_model.h5')
+model = load_model('client/model/EVA_model.h5')
+
+with open('server/dataset/dataset.json', 'r', encoding='utf-8') as f:
+    data = json.loads(f.read(), strict=False)
 
 def answer(text):
-    answer_txt = text + " 123"
+    answer_txt = data[0]["Вопрос"]
     return answer_txt
