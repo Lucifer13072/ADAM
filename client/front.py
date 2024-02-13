@@ -41,7 +41,7 @@ def main(page):
 
     def fsc(e):
         if fullscreen_b.data == True:
-            page.window_maximizable = True
+            page.window_maximized = True
             fullscreen_b.data == False
             page.update()
         else:
@@ -55,10 +55,9 @@ def main(page):
         page.update()
 
     chat = ft.ListView(
-        spacing=4,
-        padding=4,
-        horizontal=1,
-        item_extent=10
+        expand=True,
+        spacing=10,
+        auto_scroll=True,
     )
 
     
@@ -76,20 +75,37 @@ def main(page):
             data=False,)
 
     fullscreen_b = ft.IconButton(ft.icons.FULLSCREEN, on_click=fsc, data=True)
-
-    ent_block = ft.Row(controls=[new_task, ft.FilledButton("Enter:", on_click=enter_massage,)])
     
-    image = ft.Image("client/images/like.jpg")
-
+    vi = ft.Image("client/images/like.jpg")
     page.add(
         ft.Row(controls=[
-            ft.Text("EVA Alfa0.0.1", expand = True),
+            ft.Text("EVA Alfa0.0.1", expand=True, weight=900),
             theme_b,
             ft.IconButton(ft.icons.MINIMIZE, on_click=minm),
             fullscreen_b,
             ft.IconButton(ft.icons.CLOSE, on_click=lambda _: page.window_close())]),
-        
-        ft.Row(controls=[image, ft.Column([chat, ent_block]),]))
+
+        ft.Row(controls=[
+            ft.Container(
+                content=chat,
+                border=ft.border.all(1, ft.colors.OUTLINE),
+                border_radius=5,
+                padding=10,
+                width=300,
+                height=900), 
+            ft.Container(content=vi,
+                border_radius=10,
+                height=900,)    
+            ],tight=True),
+
+        ft.Row([
+                new_task,
+                ft.IconButton(
+                    icon=ft.icons.SEND_ROUNDED,
+                    tooltip="Send message",
+                    on_click=enter_massage,
+                ),], width=300),)
+
  
 ft.app(target=main)
 
