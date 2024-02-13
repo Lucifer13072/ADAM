@@ -17,6 +17,9 @@ def main(page):
     page.window_title_bar_hidden = True
     page.window_title_bar_buttons_hidden = True
 
+    w = page.width
+    h = page.height
+
     def enter_massage(e):
         chat.controls.append(ft.Text("Пользователь: " + new_task.value))
         chat.controls.append(ft.Text("Eva: " + ld.answer(new_task.value)))
@@ -44,8 +47,9 @@ def main(page):
             page.window_maximized = True
             fullscreen_b.data == False
             page.update()
-        else:
-            page.window_maximized = False
+        elif fullscreen_b.data == False:
+            page.width = w
+            page.height = h
             fullscreen_b.data == True
             page.update()
         
@@ -88,8 +92,8 @@ def main(page):
         ft.Row(controls=[
             ft.Container(
                 content=chat,
-                border=ft.border.all(1, ft.colors.OUTLINE),
-                border_radius=5,
+                border=ft.border.all(2, ft.colors.OUTLINE),
+                border_radius=10,
                 padding=10,
                 width=300,
                 height=900), 
