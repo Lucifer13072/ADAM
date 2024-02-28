@@ -22,13 +22,19 @@ def preprocess_input_text(text, tokenizer, max_seq_len):
     return padded_sequence
 
 # Функция для получения ответа от модели
-def get_model_response(input_text, loaded_model, tokenizer, max_seq_len):
-    input_seq = tokenizer.texts_to_sequences([input_text])
-    input_padded = pad_sequences(input_seq, maxlen=max_seq_len, padding='post', truncating='post')
-    predictions = loaded_model.predict(input_padded)
-    predicted_index = tf.argmax(predictions, axis=-1).numpy()[0][0]  # Extract the first element
-    predicted_word = tokenizer.index_word.get(predicted_index, '<OOV>')
-    return predicted_word
+def get_model_response(input_text, loaded_model, tokenizer, max_seq_len, max_words=100):
+    response = []
+    input_sequence = tokenizer.texts_to_sequences([input_text])[0]
+    for _ in range(max_words):
+        input_padded = pad_sequences([input_sequence], maxlen=max_seq_len, padding='post', truncating='post')
+        predictions = loaded_model.predict(input_padded)
+        predicted_index = np.argmax(predictions, axis=-1)[0]
+        predicted_word = tokenizer.index_word.get(predicted_index, '<OOV>')
+        if predicted_word == '<OOV>' or predicted_word == '<EOS>':
+            break
+        response.append(predicted_word)
+        input_sequence.append(predicted_index)
+    return ' '.join(response)
 
 # Пример использования как чат-бота
 
