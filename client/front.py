@@ -57,7 +57,7 @@ def main(page):
     )
 
     new_task = ft.TextField(
-        hint_text=mes,
+        hint_text="Сообщение: ",
         shift_enter=True,
         min_lines=1,
         max_lines=5,
