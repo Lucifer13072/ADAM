@@ -2,18 +2,6 @@ import flet as ft
 import load as ld
 import time
 
-ru = {"User":"Пользователь: ",
-      "Messenge":"Сообщение:",
-      "Name":"Eva"}
-
-eng = {"User":"User: ",
-      "Messenge":"Massenge:",
-      "Name":"Eva"}
-
-mes = ru["Messenge"]
-us = ru["User"]
-ent = ru["Name"]
-
 def main(page):
     page.title = 'Eva v0.0.1'
     page.theme_mode = ft.ThemeMode.DARK
@@ -25,7 +13,7 @@ def main(page):
     h = page.height
 
     def enter_massage(e):
-        chat.controls.append(ft.Text(us + new_task.value))
+        chat.controls.append(ft.Text("Пользователь: " + new_task.value))
         chat.controls.append(ft.Text("Eva: " + ld.answer(new_task.value)))
         new_task.value = ""
         page.update()
@@ -86,7 +74,7 @@ def main(page):
     vi = ft.Image("client/images/like.jpg")
     page.add(
         ft.Row(controls=[
-            ft.Text(ent+" Alfa0.0.1", expand=True, weight=900),
+            ft.Text("Eva"+" Alfa0.0.1", expand=True, weight=900),
             theme_b,
             ft.IconButton(ft.icons.MINIMIZE, on_click=minm),
             fullscreen_b,

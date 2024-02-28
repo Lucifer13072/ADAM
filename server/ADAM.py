@@ -1,117 +1,75 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
-import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-
-import json
-import numpy as np
+import tensorflow as tf
 from keras.models import Model
-from keras.layers import Input, LSTM, Dense
-
-# Чтение файла и загрузка данных
-with open('dataset/dataset.json', 'r', encoding='utf-8') as f:
-    data = json.loads(f.read(), strict=False)
-
-# Подготовка входных и выходных данных
-input_texts = []
-target_texts = []
-input_characters = set()
-target_characters = set()
-
-for line in data:
-    input_text = line['Вопрос']
-    target_text = line['Ответ']
-
-    input_texts.append(input_text)
-    target_texts.append(target_text)
-
-    for char in input_text:
-        if char not in input_characters:
-            print(f"Adding {repr(char)} to input_characters")
-            input_characters.add(char)
-            
-
-    for char in target_text:
-        if char not in target_characters:
-            print(f"Adding {repr(char)} to target_characters")
-            target_characters.add(char)
-
-input_characters = sorted(list(input_characters))
-target_characters = sorted(list(target_characters))
-num_encoder_tokens = len(input_characters)
-num_decoder_tokens = len(target_characters)
-max_encoder_seq_length = max([len(txt) for txt in input_texts])
-max_decoder_seq_length = max([len(txt) for txt in target_texts])
-
-# Определение словарей для перевода символов в индексы и обратно
-input_token_index = dict([(char, i) for i, char in enumerate(input_characters)])
-target_token_index = dict([(char, i) for i, char in enumerate(target_characters)])
-reverse_input_char_index = dict((i, char) for char, i in input_token_index.items())
-reverse_target_char_index = dict((i, char) for char, i in target_token_index.items())
-
-# Подготовка входных и выходных данных в формате one-hot
-encoder_input_data = np.zeros((len(input_texts), max_encoder_seq_length, num_encoder_tokens), dtype='float32')
-decoder_input_data = np.zeros((len(input_texts), max_decoder_seq_length, num_decoder_tokens), dtype='float32')
-decoder_target_data = np.zeros((len(input_texts), max_decoder_seq_length, num_decoder_tokens), dtype='float32')
-
-for i, (input_text, target_text) in enumerate(zip(input_texts, target_texts)):
-    for t, char in enumerate(input_text):
-        encoder_input_data[i, t, input_token_index[char]] = 1.0
-    for t, char in enumerate(target_text):
-        decoder_input_data[i, t, target_token_index[char]] = 1.0
-        if t > 0:
-            decoder_target_data[i, t - 1, target_token_index[char]] = 1.0
-
-# Определение размерности и конфигурации модели
-latent_dim = 256
-
-encoder_inputs = Input(shape=(None, num_encoder_tokens))
-encoder = LSTM(latent_dim, return_state=True)
-encoder_outputs, state_h, state_c = encoder(encoder_inputs)
-encoder_states = [state_h, state_c]
-
-decoder_inputs = Input(shape=(None, num_decoder_tokens))
-decoder_lstm = LSTM(latent_dim, return_sequences=True, return_state=True)
-decoder_outputs, _, _ = decoder_lstm(decoder_inputs, initial_state=encoder_states)
-decoder_dense = Dense(num_decoder_tokens, activation='softmax')
-decoder_outputs = decoder_dense(decoder_outputs)
-
-# Создание модели
-model = Model([encoder_inputs, decoder_inputs], decoder_outputs)
-
-# Компиляция модели
-model.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=['accuracy'])
-
-# Обучение модели
-epochs = 10
-batch_size = 64
-model.fit(
-    [encoder_input_data, decoder_input_data],
-    decoder_target_data,
-    batch_size=batch_size,
-    epochs=epochs,
-    validation_split=0.2
-)
-
-# Сохранение модели на диск
-model.save('../client/model/EVA_model.h5')
-
-# Сохранение модели на диск
+from keras.layers import Input, Dense, MultiHeadAttention, Dropout, LayerNormalization
+from keras.preprocessing.text import Tokenizer
+from keras.preprocessing.sequence import pad_sequences
+import json
 import pickle
 
-required_data = {
-    'num_decoder_tokens': num_decoder_tokens,
-    'max_decoder_seq_length': max_decoder_seq_length,
-    'latent_dim': latent_dim,
-    'input_token_index': input_token_index,
-    'target_token_index': target_token_index,
-    'reverse_target_char_index': reverse_target_char_index
-}
+# Загрузка и предобработка данных
+def load_dataset(file_path):
+    with open(file_path, 'r', encoding='utf-8') as file:
+        dataset = json.load(file)
+    questions = [item['Вопрос'] for item in dataset]
+    answers = [item['Ответ'] for item in dataset]
+    return questions, answers
 
-with open('../client/model/required_data.json', 'wb') as f:
-    f.write(json.dumps(required_data))
+def preprocess_data(questions, answers):
+    tokenizer = Tokenizer(oov_token='<OOV>')
+    tokenizer.fit_on_texts(questions + answers)
 
-print("Input tokens:")
-print(input_token_index)
+    questions_seq = tokenizer.texts_to_sequences(questions)
+    answers_seq = tokenizer.texts_to_sequences(answers)
 
-print("Target tokens:")
-print(target_token_index)
+    max_seq_len = max(max(len(seq) for seq in questions_seq), max(len(seq) for seq in answers_seq))
+    
+    questions_padded = pad_sequences(questions_seq, maxlen=max_seq_len, padding='post', truncating='post')
+    answers_padded = pad_sequences(answers_seq, maxlen=max_seq_len, padding='post', truncating='post')
+
+    with open('client/model/tokenizer.pickle', 'wb') as handle:
+        pickle.dump(tokenizer, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+    with open('client/model/max_seq_len.pickle', 'wb') as handle:
+        pickle.dump(max_seq_len, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+    return questions_padded, answers_padded, tokenizer, max_seq_len
+
+# Создание модели
+def transformer_chatbot_model(input_dim, num_heads, ff_dim, max_seq_len, vocab_size, dropout=0.1):
+    inputs = Input(shape=(max_seq_len,))
+
+    # Embedding слой для преобразования входных слов в вектора
+    embedding = tf.keras.layers.Embedding(input_dim=vocab_size, output_dim=input_dim)(inputs)
+
+    # Multi-Head Attention
+    attention = MultiHeadAttention(num_heads=num_heads, key_dim=input_dim)(embedding, embedding)
+    attention = Dropout(dropout)(attention)
+    x1 = LayerNormalization(epsilon=1e-6)(embedding + attention)
+
+    # Feed Forward Part
+    x2 = Dense(ff_dim, activation="relu")(x1)
+    x2 = Dense(input_dim)(x2)
+    x2 = Dropout(dropout)(x2)
+    x = LayerNormalization(epsilon=1e-6)(x1 + x2)
+
+
+    model = Model(inputs=inputs, outputs=x)
+    return model
+
+# Загрузка данных и предобработка
+file_path = 'server/dataset/dataset.json'  # Укажите путь к вашему датасету
+questions, answers = load_dataset(file_path)
+questions_padded, answers_padded, tokenizer, max_seq_len = preprocess_data(questions, answers)
+
+# Создание и компиляция модели
+vocab_size = len(tokenizer.word_index) + 1  # +1 для учета токена <OOV>
+num_attention_heads = 8
+feed_forward_dimension = 2048
+
+chatbot_model = transformer_chatbot_model(input_dim=512, num_heads=num_attention_heads, ff_dim=feed_forward_dimension,
+                                          max_seq_len=max_seq_len, vocab_size=vocab_size)
+chatbot_model.summary()
+
+# Компиляция модели
+chatbot_model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+chatbot_model.save("client/model/model.h5")
