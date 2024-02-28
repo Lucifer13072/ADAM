@@ -13,8 +13,8 @@ def main(page):
     h = page.height
 
     def enter_massage(e):
-        chat.controls.append(ft.Text("Пользователь: " + new_task.value))
-        chat.controls.append(ft.Text("Eva: " + ld.answer(new_task.value)))
+        chat.controls.append(ft.Text("Пользователь: " + new_task.value, size=11))
+        chat.controls.append(ft.Text("Eva: " + ld.answer(new_task.value), size=11))
         new_task.value = ""
         page.update()
 
