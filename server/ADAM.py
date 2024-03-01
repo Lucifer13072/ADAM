@@ -1,4 +1,5 @@
 import tensorflow as tf
+import matplotlib.pyplot as plt
 from keras.models import Model
 from keras.layers import Input, Dense, MultiHeadAttention, Dropout, LayerNormalization
 from keras.preprocessing.text import Tokenizer
@@ -26,10 +27,10 @@ def preprocess_data(questions, answers):
     questions_padded = pad_sequences(questions_seq, maxlen=max_seq_len, padding='post', truncating='post')
     answers_padded = pad_sequences(answers_seq, maxlen=max_seq_len, padding='post', truncating='post')
 
-    with open('client/model/tokenizer.pickle', 'wb') as handle:
+    with open('../client/model/tokenizer.pickle', 'wb') as handle:
         pickle.dump(tokenizer, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-    with open('client/model/max_seq_len.pickle', 'wb') as handle:
+    with open('../client/model/max_seq_len.pickle', 'wb') as handle:
         pickle.dump(max_seq_len, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
     return questions_padded, answers_padded, tokenizer, max_seq_len
@@ -57,7 +58,7 @@ def transformer_chatbot_model(input_dim, num_heads, ff_dim, max_seq_len, vocab_s
     return model
 
 # Загрузка данных и предобработка
-file_path = 'server/dataset/dataset.json'  # Укажите путь к вашему датасету
+file_path = 'dataset/dataset.json'  # Укажите путь к вашему датасету
 questions, answers = load_dataset(file_path)
 questions_padded, answers_padded, tokenizer, max_seq_len = preprocess_data(questions, answers)
 
@@ -70,6 +71,5 @@ chatbot_model = transformer_chatbot_model(input_dim=512, num_heads=num_attention
                                           max_seq_len=max_seq_len, vocab_size=vocab_size)
 chatbot_model.summary()
 
-# Компиляция модели
-chatbot_model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
-chatbot_model.save("client/model/model.h5")
+chatbot_model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+chatbot_model.save("../client/model/model.h5")

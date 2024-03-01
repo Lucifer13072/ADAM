@@ -6,13 +6,13 @@ import numpy as np
 import json
 import pickle
 
-model_path = 'client/model/model.h5'
+model_path = 'model/model.h5'
 loaded_model = load_model(model_path)
 
-with open('client/model/tokenizer.pickle', 'rb') as handle:
+with open('model/tokenizer.pickle', 'rb') as handle:
     tokenizer = pickle.load(handle)
 
-with open('client/model/max_seq_len.pickle', 'rb') as handle:
+with open('model/max_seq_len.pickle', 'rb') as handle:
     max_seq_len = pickle.load(handle)
 
 # Функция предобработки входного текста

@@ -71,7 +71,7 @@ def main(page):
 
     fullscreen_b = ft.IconButton(ft.icons.FULLSCREEN, on_click=fsc, data=True)
     
-    vi = ft.Image("client/images/like.jpg")
+    vi = ft.Image("images/like.jpg")
     page.add(
         ft.Row(controls=[
             ft.Text("Eva"+" Alfa0.0.1", expand=True, weight=900),
