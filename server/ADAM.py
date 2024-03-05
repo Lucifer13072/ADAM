@@ -1,7 +1,8 @@
 import tensorflow as tf
 import matplotlib.pyplot as plt
+from keras.layers import Input, Embedding, Dense, Dropout, LayerNormalization, MultiHeadAttention, concatenate
 from keras.models import Model
-from keras.layers import Input, Dense, MultiHeadAttention, Dropout, LayerNormalization
+from keras.layers import Add
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
 import json
@@ -37,24 +38,38 @@ def preprocess_data(questions, answers):
 
 # Создание модели
 def transformer_chatbot_model(input_dim, num_heads, ff_dim, max_seq_len, vocab_size, dropout=0.1):
-    inputs = Input(shape=(max_seq_len,))
+    # Вход для вопросов
+    encoder_inputs = Input(shape=(max_seq_len,))
+    # Вход для ответов
+    decoder_inputs = Input(shape=(max_seq_len,))
 
     # Embedding слой для преобразования входных слов в вектора
-    embedding = tf.keras.layers.Embedding(input_dim=vocab_size, output_dim=input_dim)(inputs)
+    embedding_layer = Embedding(input_dim=vocab_size, output_dim=input_dim)
 
-    # Multi-Head Attention
-    attention = MultiHeadAttention(num_heads=num_heads, key_dim=input_dim)(embedding, embedding)
-    attention = Dropout(dropout)(attention)
-    x1 = LayerNormalization(epsilon=1e-6)(embedding + attention)
+    encoder_embedding = embedding_layer(encoder_inputs)
+    decoder_embedding = embedding_layer(decoder_inputs)
+
+    # Multi-Head Attention для вопросов
+    encoder_attention = MultiHeadAttention(num_heads=num_heads, key_dim=input_dim)(encoder_embedding, encoder_embedding)
+    encoder_attention = Dropout(dropout)(encoder_attention)
+    encoder_output = LayerNormalization(epsilon=1e-6)(encoder_embedding + encoder_attention)
+
+    # Multi-Head Attention для ответов
+    decoder_attention = MultiHeadAttention(num_heads=num_heads, key_dim=input_dim)(decoder_embedding, decoder_embedding)
+    decoder_attention = Dropout(dropout)(decoder_attention)
+    decoder_output = LayerNormalization(epsilon=1e-6)(decoder_embedding + decoder_attention)
+
+    # Объединение выходов
+    combined_output = Add()([encoder_output, decoder_output])
 
     # Feed Forward Part
-    x2 = Dense(ff_dim, activation="relu")(x1)
-    x2 = Dense(input_dim)(x2)
-    x2 = Dropout(dropout)(x2)
-    x = LayerNormalization(epsilon=1e-6)(x1 + x2)
+    x = Dense(ff_dim, activation="relu")(combined_output)
+    x = Dense(input_dim)(x)
+    x = Dropout(dropout)(x)
+    output = LayerNormalization(epsilon=1e-6)(combined_output + x)
 
-
-    model = Model(inputs=inputs, outputs=x)
+    # Создание модели
+    model = Model(inputs=[encoder_inputs, decoder_inputs], outputs=output)
     return model
 
 # Загрузка данных и предобработка
@@ -66,10 +81,28 @@ questions_padded, answers_padded, tokenizer, max_seq_len = preprocess_data(quest
 vocab_size = len(tokenizer.word_index) + 1  # +1 для учета токена <OOV>
 num_attention_heads = 8
 feed_forward_dimension = 2048
-
+# Создание и компиляция модели
 chatbot_model = transformer_chatbot_model(input_dim=512, num_heads=num_attention_heads, ff_dim=feed_forward_dimension,
                                           max_seq_len=max_seq_len, vocab_size=vocab_size)
-chatbot_model.summary()
 
-chatbot_model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+chatbot_model.compile(optimizer='adam', loss="sparse_categorical_crossentropy", metrics=['accuracy'])
+
+# Обучение модели
+history = chatbot_model.fit([questions_padded, answers_padded], answers_padded, epochs=10, batch_size=64, validation_split=0.2)
+
+# Вывод графика потерь
+plt.plot(history.history['loss'], label='Training Loss')
+plt.plot(history.history['val_loss'], label='Validation Loss')
+plt.xlabel('Epoch')
+plt.ylabel('Loss')
+plt.legend()
+plt.show()
+
+# Вывод графика точности
+plt.plot(history.history['accuracy'], label='Training Accuracy')
+plt.plot(history.history['val_accuracy'], label='Validation Accuracy')
+plt.xlabel('Epoch')
+plt.ylabel('Accuracy')
+plt.legend()
+plt.show()
 chatbot_model.save("../client/model/model.h5")
