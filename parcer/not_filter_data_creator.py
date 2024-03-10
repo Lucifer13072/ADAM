@@ -18,15 +18,17 @@ def import_text(link):
     article = ' '.join(sentence_list)
     return article
 
-with open("states_Hubr.json", "r", encoding='utf-8') as f:
+with open("data/states_Hubr.json", "r", encoding='utf-8') as f:
     file = json.load(f)
 
-
+count = 1
 for i in range(len(file)):
     if i > (len(file)//2)-1:
        break
     else:
-        data[i+1] = import_text(file[str(i+1)])
+        if import_text(file[str(i+1)]) != "" and len(import_text(file[str(i+1)])) > 20:
+            data[count] = import_text(file[str(i+1)])
+            count += 1
         
         
 with open("data/not_filter_data.json", "w",  encoding='utf-8') as f:

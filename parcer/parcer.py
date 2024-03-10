@@ -23,13 +23,12 @@ links = ['https://habr.com/ru/articles',
          'https://habr.com/ru/articles/page3/',
          'https://habr.com/ru/articles/page4/',
          'https://habr.com/ru/articles/page5/']
-
+a = 0
 for i in links:
     req = requests.get(i, headers=headers).text
 
     soup = BeautifulSoup(req, 'lxml')
     all_hrefs_articles = soup.find_all('a', class_='tm-title__link') # получаем статьи
-    a = 0
     for article in all_hrefs_articles: # проходимся по статьям
         a += 1
         article_name = article.find('span').text # собираем названия статей
