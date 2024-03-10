@@ -31,7 +31,6 @@ def get_model_response(input_text, loaded_model, tokenizer, max_seq_len):
     return predicted_word
 
 # Пример использования как чат-бота
-
 def answer(user_input):
     response = get_model_response(user_input, loaded_model, tokenizer, max_seq_len)
     return response
