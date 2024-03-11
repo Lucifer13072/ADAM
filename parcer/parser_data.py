@@ -4,7 +4,11 @@ import json
 import requests
 from fake_useragent import UserAgent
 from progress.bar import IncrementalBar
-from progress.bar import Bar
+from progress.spinner import Spinner
+from openai import OpenAI
+
+client = OpenAI(api_key='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')
+
 
 def import_text(link):
     page = requests.get(link).text
@@ -20,12 +24,10 @@ def import_text(link):
 
 def create_question(text):
     prompt="Напиши вопрос к этому тексту: " + f"\n\n{text}"
-    completions = openai.Completion.create(
-        engine="gpt-3.5-turbo-0125",
+    completions = client.completions.create(
+        model="gpt-3.5-turbo-0125",
         prompt=prompt,
         max_tokens=1024,
-        n=1,
-        stop=None,
         temperature=0.5,
     )
 
@@ -46,18 +48,13 @@ def split_text(file):
             parts = [sentences[i:i+8] for i in range(0, len(sentences), 8)]
     
     # Преобразование частей в строки и запись в словарь
-
             for part in parts:
                 str_var_value = '. '.join(part)
                 if str_var_value != "":
-                    # json_dict.append({"Вопрос": create_question(str_var_value)})
+                    #json_dict.append({"Вопрос": create_question(str_var_value)})
                     json_dict.append({"Ответ": str_var_value})
     
     return json_dict
-
-
-openai.api_key = "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"
-
 
 ua = UserAgent()
 
@@ -70,23 +67,26 @@ article_dict = {}
 num = int(input("Введите количество ссылок: "))
 bar = IncrementalBar('Парсинг ссылок', max = num)
 a = 0
+if num > 1:
+    for i in range(num):
+        link = f"https://habr.com/ru/articles/page{i}/"
+        req = requests.get(link, headers=headers).text
 
-for i in range(num):
-    link = f"https://habr.com/ru/articles/page{i}/"
-    req = requests.get(link, headers=headers).text
+        soup = BeautifulSoup(req, 'lxml')
+        all_hrefs_articles = soup.find_all('a', class_='tm-title__link') # получаем статьи
+        for article in all_hrefs_articles: # проходимся по статьям
+            a += 1
+            article_name = article.find('span').text # собираем названия статей
+            article_link = f'https://habr.com{article.get("href")}' # ссылки на статьи
+            article_dict[article_name] = article_link
+            article_dict[a] = article_link
+        bar.next()
+    bar.finish()
+else:
+    print(NameError("Слишком малое кол-во ссылок"))
+        
 
-    soup = BeautifulSoup(req, 'lxml')
-    all_hrefs_articles = soup.find_all('a', class_='tm-title__link') # получаем статьи
-    for article in all_hrefs_articles: # проходимся по статьям
-        a += 1
-        article_name = article.find('span').text # собираем названия статей
-        article_link = f'https://habr.com{article.get("href")}' # ссылки на статьи
-        article_dict[article_name] = article_link
-        article_dict[a] = article_link
-    bar.next()
-bar.finish()
-
-not_filter_bar = Bar('Парсинг текста', max = len(article_dict))
+not_filter_bar = Spinner('Парсинг текста ')
 count = 1
 data = {}
 
