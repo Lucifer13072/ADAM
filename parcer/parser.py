@@ -98,6 +98,7 @@ for i in range(len(article_dict)):
             data[count] = import_text(article_dict[i+1])
             count += 1
             not_filter_bar.next()
+not_filter_bar.finish()
 
 dataset = split_text(data)
     
