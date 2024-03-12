@@ -1,4 +1,3 @@
-import tensorflow as tf
 import matplotlib.pyplot as plt
 from keras.layers import Input, Embedding, Dense, Dropout, LayerNormalization, MultiHeadAttention, concatenate
 from keras.models import Model
@@ -7,6 +6,8 @@ from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
 import json
 import pickle
+import os
+
 
 # Загрузка и предобработка данных
 def load_dataset(file_path):

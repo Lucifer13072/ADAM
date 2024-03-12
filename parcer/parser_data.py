@@ -7,7 +7,7 @@ from progress.bar import IncrementalBar
 from progress.spinner import Spinner
 from openai import OpenAI
 
-client = OpenAI(api_key='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')
+client = OpenAI(api_key='')
 
 
 def import_text(link):
