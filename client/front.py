@@ -105,7 +105,7 @@ def main(page):
 
 
     def help(e):
-        webbrowser.open("http://localhost")
+        webbrowser.open("https://youtu.be/Sagg08DrO5U?si=2LE82h9crafbvjd3")
         page.update()
 
     chat = ft.ListView(
@@ -174,6 +174,29 @@ def main(page):
     settings_b = ft.IconButton(ft.icons.SETTINGS, on_click=settings)
 
     vi = ft.Image("images/like.jpg")
+
+    chat_cont = ft.Container(
+                content=chat,
+                border=ft.border.all(2, ft.colors.OUTLINE),
+                border_radius=10,
+                padding=10,
+                width=300,
+                height=page.height-180)
+    
+    video = ft.Container(content=vi,
+                border_radius=10,
+                height=page.height-180,
+                alignment=ft.alignment.center,
+                width=page.width-350)
+
+    def page_resize(e):
+       chat_cont.height=page.height-180
+       video.height=page.height-180
+       video.width=page.width-350
+       page.update()
+
+    page.on_resize = page_resize
+
     page.add(
 
         ft.Row(controls=[ft.WindowDragArea(
@@ -186,26 +209,18 @@ def main(page):
         ft.Divider(),
 
         ft.Row(controls=[
-            ft.Container(
-                content=chat,
-                border=ft.border.all(2, ft.colors.OUTLINE),
-                border_radius=10,
-                padding=10,
-                width=300,
-                height=900), 
-            ft.Container(content=vi,
-                border_radius=10,
-                height=900,)    
-            ],tight=True),
+            chat_cont,
+            video],tight=True),
 
         ft.Row([
                 new_task,
                 ft.IconButton(
                     icon=ft.icons.SEND_ROUNDED,
                     tooltip="Send message",
-                    on_click=enter_massage,
+                    on_click=enter_massage
                 ),], width=300),)
 
  
 ft.app(target=main)
 
+#TODO написать функцию сохраниения настроек и по возможности добавить более гибкую настройку темы
