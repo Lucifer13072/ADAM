@@ -2,22 +2,67 @@ import flet as ft
 import load as ld
 import time
 import webbrowser
+import json
 
 
 def main(page):
+    def ru():
+        lang_b.text = "Русский"
+        new_task.hint_text = "Сообщение: "
+        model_button_login_dl.text= "Назад"
+        model_button_main_dl.text = "Сохранить"
+        settings_text.value = "Настройки"
+        repl_theme_text.value = "Изменить тему: "
+        repl_lang_text.value = "Изменить язык: "
+        login_title_text.value = "Профиль"
+        login_text.value = "Введите ваше имя: " 
+        key_text.value = "Введите ключ: "
+
+    def eng():
+        lang_b.data = True
+        lang_b.text = "English"
+        new_task.hint_text = "Messenge: "
+        model_button_login_dl.text = "Back"
+        model_button_main_dl.text = "Save"
+        settings_text.value = "Settings"
+        repl_theme_text.value = "Replace Theme: "
+        repl_lang_text.value = "Replace language: "
+        login_title_text.value = "Profile" 
+        login_text.value = "Enter your name: "
+        key_text.value = "Enter key: "
+    
+    def dark():
+        page.theme_mode = ft.ThemeMode.DARK
+        theme_b.bgcolor=ft.colors.BLACK
+        theme_b.color=ft.colors.WHITE
+        theme_b.icon = ft.icons.DARK_MODE
+
+    def light():
+        page.theme_mode = ft.ThemeMode.LIGHT
+        theme_b.bgcolor=ft.colors.WHITE
+        theme_b.color=ft.colors.BLACK
+        theme_b.icon = ft.icons.LIGHT_MODE
+
+    with open("settings.json", "r", encoding="utf-8") as file:
+            settings_par = json.load(file)
+
+    parametrs = settings_par
+    
     page.title = 'Eva v0.0.2'
     page.theme_mode = ft.ThemeMode.DARK
     page.fullscreen_dialog = True
     page.window_title_bar_hidden = True
     page.window_title_bar_buttons_hidden = True
-    page.window_width = 1080
-    page.window_height = 700
+    page.window_width = parametrs["width"]
+    page.window_height = parametrs["height"]
+
+    
 
     def enter_massage(e):
-        if name_task.value == "":
+        if settings_par["login"] == "":
             chat.controls.append(ft.Text(f"Пользователь: " + new_task.value, size=11))
         else:
-            chat.controls.append(ft.Text(f"{name_task.value}:" + new_task.value, size=11))
+            chat.controls.append(ft.Text(f'{settings_par["login"]}:' + new_task.value, size=11))
 
         chat.controls.append(ft.Text("Eva: " + ld.answer(new_task.value), size=11))
         new_task.value = ""
@@ -27,17 +72,12 @@ def main(page):
     def theme_replace(e):
         if theme_b.data == True: #Dark
             theme_b.data = False
-            page.theme_mode = ft.ThemeMode.DARK
-            theme_b.bgcolor=ft.colors.BLACK
-            theme_b.color=ft.colors.WHITE
-            theme_b.icon = ft.icons.DARK_MODE
+            dark()
+            parametrs["theme"] = True
         else: #Light 
             theme_b.data = True
-            page.theme_mode = ft.ThemeMode.LIGHT
-            theme_b.bgcolor=ft.colors.WHITE
-            theme_b.color=ft.colors.BLACK
-            theme_b.icon = ft.icons.LIGHT_MODE
-
+            light()
+            parametrs["theme"] = False
         page.update()
 
     def fsc(e):
@@ -56,10 +96,6 @@ def main(page):
         settings_modal.open = True
         page.update()
 
-    def close_settings(e):
-        settings_modal.open = False
-        page.update()
-
     def minm(e):
         page.window_minimized = True
         page.update()
@@ -67,29 +103,13 @@ def main(page):
     def language_repl(e):
         if lang_b.data == True: #RU
             lang_b.data = False
-            lang_b.text = "Русский"
-            new_task.hint_text = "Сообщение: "
-            model_button_login_dl.text= "Сохранить"
-            model_button_main_dl.text = "Сохранить"
-            settings_text.value = "Настройки"
-            repl_theme_text.value = "Изменить тему: "
-            repl_lang_text.value = "Изменить язык: "
-            login_title_text.value = "Профиль"
-            login_text.value = "Введите ваше имя: " 
-            key_text.value = "Введите ключ: " 
+            ru()
+            parametrs["language"] = True
 
         else: #ENG
             lang_b.data = True
-            lang_b.text = "English"
-            new_task.hint_text = "Messenge: "
-            model_button_login_dl.text = "Save"
-            model_button_main_dl.text = "Save"
-            settings_text.value = "Settings"
-            repl_theme_text.value = "Replace Theme: "
-            repl_lang_text.value = "Replace language: "
-            login_title_text.value = "Profile" 
-            login_text.value = "Enter your name: "
-            key_text.value = "Enter key: " 
+            eng()
+            parametrs["language"] = False
         page.update()
 
     def login_form_open(e):
@@ -108,6 +128,14 @@ def main(page):
         webbrowser.open("https://youtu.be/Sagg08DrO5U?si=2LE82h9crafbvjd3")
         page.update()
 
+    def save_setting(e):
+        parametrs["login"] = name_task.value
+        parametrs["key"] = key_task.value
+        with open("settings.json", "w", encoding="utf-8") as file:
+            json.dump(parametrs, file)
+        settings_modal.open = False
+        page.update()
+
     chat = ft.ListView(
         expand=True,
         spacing=10,
@@ -122,15 +150,15 @@ def main(page):
         max_lines=5,
         filled=True,
         on_submit=enter_massage)
-    name_task = ft.TextField(max_lines=1, shift_enter=True, expand=True)
-    key_task = ft.TextField(max_lines=1, shift_enter=True, expand=True)
+    name_task = ft.TextField(max_lines=1, shift_enter=True, expand=True, value=settings_par["login"])
+    key_task = ft.TextField(max_lines=1, shift_enter=True, expand=True, value=settings_par["key"])
 
 
     # buttons
-    theme_b = ft.IconButton(icon=ft.icons.DARK_MODE, on_click=theme_replace, data=False,) 
+    theme_b = ft.IconButton(icon=ft.icons.DARK_MODE, on_click=theme_replace) 
     fullscreen_b = ft.IconButton(ft.icons.FULLSCREEN, on_click=fsc, data=True)
-    lang_b = ft.TextButton(text="Русский", on_click=language_repl, data=False)
-    model_button_main_dl = ft.TextButton(text="Сохранить", on_click=close_settings)
+    lang_b = ft.TextButton(text="Русский", on_click=language_repl)
+    model_button_main_dl = ft.TextButton(text="Сохранить", on_click=save_setting)
     model_button_login_dl = ft.TextButton(text="Сохранить", on_click=login_form_close)
     login_form_b = ft.IconButton(ft.icons.KEY, on_click=login_form_open)
 
@@ -190,11 +218,14 @@ def main(page):
                 width=page.width-350)
 
     def page_resize(e):
-       chat_cont.height=page.height-180
-       video.height=page.height-180
-       video.width=page.width-350
-       page.update()
-
+        chat_cont.height=page.height-180
+        video.height=page.height-180
+        video.width=page.width-350
+        page.update()
+        parametrs["width"] = page.window_width
+        parametrs["height"] = page.window_height
+        with open("settings.json", "w", encoding="utf-8") as file:
+            json.dump(parametrs, file)
     page.on_resize = page_resize
 
     page.add(
@@ -219,8 +250,17 @@ def main(page):
                     tooltip="Send message",
                     on_click=enter_massage
                 ),], width=300),)
-
- 
+    if settings_par["language"] == True:
+        ru()
+        lang_b.data = False
+    else:
+        eng()
+        lang_b.data = True
+    
+    if settings_par["theme"] == True:
+        dark()
+        theme_b.data = False
+    else:
+        light()
+        theme_b.data = True
 ft.app(target=main)
-
-#TODO написать функцию сохраниения настроек и по возможности добавить более гибкую настройку темы
