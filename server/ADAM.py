@@ -89,22 +89,22 @@ chatbot_model = transformer_chatbot_model(input_dim=512, num_heads=num_attention
 chatbot_model.compile(optimizer='adam', loss="sparse_categorical_crossentropy", metrics=['accuracy'])
 
 # Обучение модели
-history = chatbot_model.fit([questions_padded, answers_padded], answers_padded, epochs=10, batch_size=64, validation_split=0.2)
+# history = chatbot_model.fit([questions_padded, answers_padded], answers_padded, epochs=10, batch_size=64, validation_split=0.2)
 
-# Вывод графика потерь
-plt.plot(history.history['loss'], label='Training Loss')
-plt.plot(history.history['val_loss'], label='Validation Loss')
-plt.xlabel('Epoch')
-plt.ylabel('Loss')
-plt.legend()
-plt.savefig("grafics/loss.jpg")
+# # Вывод графика потерь
+# plt.plot(history.history['loss'], label='Training Loss')
+# plt.plot(history.history['val_loss'], label='Validation Loss')
+# plt.xlabel('Epoch')
+# plt.ylabel('Loss')
+# plt.legend()
+# plt.savefig("grafics/loss.jpg")
 
-# Вывод графика точности
-plt.plot(history.history['accuracy'], label='Training Accuracy')
-plt.plot(history.history['val_accuracy'], label='Validation Accuracy')
-plt.xlabel('Epoch')
-plt.ylabel('Accuracy')
-plt.legend()
-plt.savefig("grafics/accuracy.jpg")
+# # Вывод графика точности
+# plt.plot(history.history['accuracy'], label='Training Accuracy')
+# plt.plot(history.history['val_accuracy'], label='Validation Accuracy')
+# plt.xlabel('Epoch')
+# plt.ylabel('Accuracy')
+# plt.legend()
+# plt.savefig("grafics/accuracy.jpg")
 
 chatbot_model.save("../client/model/model.h5")

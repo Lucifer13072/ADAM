@@ -7,7 +7,7 @@ from progress.bar import IncrementalBar
 from progress.spinner import Spinner
 from openai import OpenAI
 
-client = OpenAI(api_key='')
+client = OpenAI(api_key='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')
 
 
 def import_text(link):
@@ -25,7 +25,7 @@ def import_text(link):
 def create_question(text):
     prompt="Напиши вопрос к этому тексту: " + f"\n\n{text}"
     completions = client.completions.create(
-        model="gpt-3.5-turbo-0125",
+        model="gpt-3.5-turbo",
         prompt=prompt,
         max_tokens=1024,
         temperature=0.5,
@@ -51,7 +51,7 @@ def split_text(file):
             for part in parts:
                 str_var_value = '. '.join(part)
                 if str_var_value != "":
-                    #json_dict.append({"Вопрос": create_question(str_var_value)})
+                    json_dict.append({"Вопрос": create_question(str_var_value)})
                     json_dict.append({"Ответ": str_var_value})
     
     return json_dict
@@ -86,7 +86,7 @@ else:
     print(NameError("Слишком малое кол-во ссылок"))
         
 
-not_filter_bar = Spinner('Парсинг текста ')
+not_filter_bar = IncrementalBar('Парсинг ссылок', max = len(article_dict))
 count = 1
 data = {}
 
@@ -97,7 +97,7 @@ for i in range(len(article_dict)):
         if import_text(article_dict[i+1]) != "" and len(import_text(article_dict[i+1])) > 20:
             data[count] = import_text(article_dict[i+1])
             count += 1
-            not_filter_bar.next()
+        not_filter_bar.next()
 not_filter_bar.finish()
 
 dataset = split_text(data)
