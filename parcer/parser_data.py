@@ -1,14 +1,14 @@
-import openai
+import datetime
 from bs4 import BeautifulSoup
 import json
 import requests
 from fake_useragent import UserAgent
 from progress.bar import IncrementalBar
 from progress.spinner import Spinner
-from openai import OpenAI
+from langchain.schema import HumanMessage, SystemMessage
+from langchain.chat_models.gigachat import GigaChat
 
-client = OpenAI(api_key='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')
-
+chat = GigaChat(credentials="MDM1YjkzNjItMzhkYS00NTRkLWI1MzUtOTg5NmZhMjFkYzljOjZlZTVkZjJhLTIxZGYtNDQ5MS05MzZjLTIxNjQ3ODcwMTZmZA==", scope="GIGACHAT_API_PERS", verify_ssl_certs=False, streaming=True)
 
 def import_text(link):
     page = requests.get(link).text
@@ -22,17 +22,16 @@ def import_text(link):
     article = ' '.join(sentence_list)
     return article
 
-def create_question(text):
-    prompt="Напиши вопрос к этому тексту: " + f"\n\n{text}"
-    completions = client.completions.create(
-        model="gpt-3.5-turbo",
-        prompt=prompt,
-        max_tokens=1024,
-        temperature=0.5,
-    )
-
-    return completions.choices[0].text
-
+def generate_answer(text):
+    messages = [
+    SystemMessage(
+        content=""
+        )
+    ]
+    messages.append(HumanMessage(content= "Сосотавь вопрос по тексту: "+text))
+    res = chat(messages)
+    messages.append(res)
+    return res.content
 
 def split_text(file):
     json_dict = []
@@ -51,8 +50,9 @@ def split_text(file):
             for part in parts:
                 str_var_value = '. '.join(part)
                 if str_var_value != "":
-                    json_dict.append({"Вопрос": create_question(str_var_value)})
-                    json_dict.append({"Ответ": str_var_value})
+                    json_dict.append({
+                        "Вопрос": generate_answer(str_var_value),
+                        "Ответ": str_var_value})
     
     return json_dict
 
@@ -99,6 +99,10 @@ for i in range(len(article_dict)):
             count += 1
         not_filter_bar.next()
 not_filter_bar.finish()
+
+with open(f"NotFilterData{datetime.date.today()}.json", "a", encoding="utf-8") as f:
+    json.dump(data, f, ensure_ascii=False, indent=4)
+    f.write("\n")
 
 dataset = split_text(data)
     

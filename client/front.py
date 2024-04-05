@@ -136,6 +136,11 @@ def main(page):
         settings_modal.open = False
         page.update()
 
+    def clear_chat(e):
+        chat.controls.clear()
+        page.update()
+        
+
     chat = ft.ListView(
         expand=True,
         spacing=10,
@@ -161,6 +166,7 @@ def main(page):
     model_button_main_dl = ft.TextButton(text="Сохранить", on_click=save_setting)
     model_button_login_dl = ft.TextButton(text="Сохранить", on_click=login_form_close)
     login_form_b = ft.IconButton(ft.icons.KEY, on_click=login_form_open)
+    clear_b = ft.TextButton(text="Clear", on_click=clear_chat)
 
     #Texts
     settings_text = ft.Text("Настройки")
@@ -249,7 +255,9 @@ def main(page):
                     icon=ft.icons.SEND_ROUNDED,
                     tooltip="Send message",
                     on_click=enter_massage
-                ),], width=300),)
+                ),
+                clear_b
+                ], width=400),)
     if settings_par["language"] == True:
         ru()
         lang_b.data = False

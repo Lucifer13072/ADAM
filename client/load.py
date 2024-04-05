@@ -24,7 +24,7 @@ def preprocess_input_text(text, tokenizer, max_seq_len):
 # Функция для получения ответа от модели
 def get_model_response(input_sequence, loaded_model):
     predictions = loaded_model.predict(input_sequence)
-    predicted_index = tf.argmax(predictions, axis=-1).numpy()[0][0]  # Extract the first element
+    predicted_index = tf.argmax(predictions, axis=-1).numpy()[0][0] 
     predicted_word = tokenizer.index_word.get(predicted_index, '<OOV>')
     return predicted_word
 
