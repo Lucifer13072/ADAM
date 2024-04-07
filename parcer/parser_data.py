@@ -100,7 +100,7 @@ for i in range(len(article_dict)):
         not_filter_bar.next()
 not_filter_bar.finish()
 
-with open(f"NotFilterData{datetime.date.today()}.json", "a", encoding="utf-8") as f:
+with open(f"notFilterData/NotFilterData{datetime.date.today()}.json", "a", encoding="utf-8") as f:
     json.dump(data, f, ensure_ascii=False, indent=4)
     f.write("\n")
 

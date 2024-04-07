@@ -1,4 +1,8 @@
+import os
+os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
+
 import matplotlib.pyplot as plt
+import tensorflow as tf
 from keras.layers import Input, Embedding, Dense, Dropout, LayerNormalization, MultiHeadAttention, concatenate
 from keras.models import Model
 from keras.layers import Add
@@ -6,7 +10,6 @@ from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
 import json
 import pickle
-import os
 
 
 # Загрузка и предобработка данных
@@ -83,28 +86,28 @@ vocab_size = len(tokenizer.word_index) + 1  # +1 для учета токена 
 num_attention_heads = 8
 feed_forward_dimension = 2048
 # Создание и компиляция модели
-chatbot_model = transformer_chatbot_model(input_dim=512, num_heads=num_attention_heads, ff_dim=feed_forward_dimension,
+chatbot_model = transformer_chatbot_model(input_dim=1000, num_heads=num_attention_heads, ff_dim=feed_forward_dimension,
                                           max_seq_len=max_seq_len, vocab_size=vocab_size)
 
-chatbot_model.compile(optimizer='adam', loss="sparse_categorical_crossentropy", metrics=['accuracy'])
+chatbot_model.compile(optimizer='adam', loss=tf.compat.v1.losses.sparse_softmax_cross_entropy, metrics=['accuracy'])
 
 # Обучение модели
-# history = chatbot_model.fit([questions_padded, answers_padded], answers_padded, epochs=10, batch_size=64, validation_split=0.2)
+history = chatbot_model.fit([questions_padded, answers_padded], answers_padded, epochs=10, batch_size=64, validation_split=0.2)
 
 # # Вывод графика потерь
-# plt.plot(history.history['loss'], label='Training Loss')
-# plt.plot(history.history['val_loss'], label='Validation Loss')
-# plt.xlabel('Epoch')
-# plt.ylabel('Loss')
-# plt.legend()
-# plt.savefig("grafics/loss.jpg")
+plt.plot(history.history['loss'], label='Training Loss')
+plt.plot(history.history['val_loss'], label='Validation Loss')
+plt.xlabel('Epoch')
+plt.ylabel('Loss')
+plt.legend()
+plt.savefig("grafics/loss.jpg")
 
-# # Вывод графика точности
-# plt.plot(history.history['accuracy'], label='Training Accuracy')
-# plt.plot(history.history['val_accuracy'], label='Validation Accuracy')
-# plt.xlabel('Epoch')
-# plt.ylabel('Accuracy')
-# plt.legend()
-# plt.savefig("grafics/accuracy.jpg")
+
+plt.plot(history.history['accuracy'], label='Training Accuracy')
+plt.plot(history.history['val_accuracy'], label='Validation Accuracy')
+plt.xlabel('Epoch')
+plt.ylabel('Accuracy')
+plt.legend()
+plt.savefig("grafics/accuracy.jpg")
 
 chatbot_model.save("../client/model/model.h5")
