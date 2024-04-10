@@ -125,7 +125,7 @@ def main(page):
 
 
     def help(e):
-        webbrowser.open("https://youtu.be/Sagg08DrO5U?si=2LE82h9crafbvjd3")
+        webbrowser.open("https://atgex-sphere.ru/ADAM/")
         page.update()
 
     def save_setting(e):
