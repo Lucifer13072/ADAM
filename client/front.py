@@ -3,6 +3,7 @@ import load as ld
 import time
 import webbrowser
 import json
+import auth
 
 
 def main(page):
@@ -17,6 +18,8 @@ def main(page):
         login_title_text.value = "Профиль"
         login_text.value = "Введите ваше имя: " 
         key_text.value = "Введите ключ: "
+        start_title_text.value = "Войти в аккаунт"
+        pass_text.value = "Пароль: "
 
     def eng():
         lang_b.data = True
@@ -30,6 +33,8 @@ def main(page):
         login_title_text.value = "Profile" 
         login_text.value = "Enter your name: "
         key_text.value = "Enter key: "
+        start_title_text.value = "Login to account"
+        pass_text.value = "Password: "
     
     def dark():
         page.theme_mode = ft.ThemeMode.DARK
@@ -59,10 +64,10 @@ def main(page):
     
 
     def enter_massage(e):
-        if settings_par["login"] == "":
+        if settings_par["name"] == "":
             chat.controls.append(ft.Text(f"Пользователь: " + new_task.value, size=11))
         else:
-            chat.controls.append(ft.Text(f'{settings_par["login"]}:' + new_task.value, size=11))
+            chat.controls.append(ft.Text(f'{settings_par["name"]}:' + new_task.value, size=11))
 
         chat.controls.append(ft.Text("Eva: " + ld.answer(new_task.value), size=11))
         new_task.value = ""
@@ -129,7 +134,7 @@ def main(page):
         page.update()
 
     def save_setting(e):
-        parametrs["login"] = name_task.value
+        parametrs["name"] = name_task.value
         parametrs["key"] = key_task.value
         with open("settings.json", "w", encoding="utf-8") as file:
             json.dump(parametrs, file)
@@ -139,6 +144,21 @@ def main(page):
     def clear_chat(e):
         chat.controls.clear()
         page.update()
+
+    def authe(e):
+        if auth.authatification(login_task.value, password_task.value) == True:
+            parametrs["auth"] = True
+            with open("settings.json", "w", encoding="utf-8") as file:
+                json.dump(parametrs, file)
+            
+            start_modal.open = False
+            page.update()
+        else:
+            if settings_par["language"] == True:
+                error_login_text.value = "Неправельное имя пользователя или пароль"
+            else:
+                error_login_text.value = "Incorrect username or password"
+            error_login_text.update()
         
 
     chat = ft.ListView(
@@ -155,9 +175,10 @@ def main(page):
         max_lines=5,
         filled=True,
         on_submit=enter_massage)
-    name_task = ft.TextField(max_lines=1, shift_enter=True, expand=True, value=settings_par["login"])
+    name_task = ft.TextField(max_lines=1, shift_enter=True, expand=True, value=settings_par["name"])
     key_task = ft.TextField(max_lines=1, shift_enter=True, expand=True, value=settings_par["key"])
-
+    login_task = ft.TextField(max_lines=1, shift_enter=True, expand=True, value="")
+    password_task = ft.TextField(max_lines=1, shift_enter=True, expand=True, value="")
 
     # buttons
     theme_b = ft.IconButton(icon=ft.icons.DARK_MODE, on_click=theme_replace) 
@@ -167,14 +188,19 @@ def main(page):
     model_button_login_dl = ft.TextButton(text="Сохранить", on_click=login_form_close)
     login_form_b = ft.IconButton(ft.icons.KEY, on_click=login_form_open)
     clear_b = ft.TextButton(text="Clear", on_click=clear_chat)
+    login_button = ft.TextButton(text="Login", on_click=authe)
 
     #Texts
     settings_text = ft.Text("Настройки")
     repl_lang_text = ft.Text("Изменить язык: ")
     repl_theme_text = ft.Text("Изменить тему: ")
     login_title_text = ft.Text("Профиль")
+    start_title_text = ft.Text("Войти в аккаунт")
     key_text = ft.Text("Введите ключ: ")
     login_text = ft.Text("Введите ваше имя: ")
+    pass_text = ft.Text("Пароль")
+    error_login_text = ft.Text("", color=ft.colors.RED)
+
 
     settings_modal = ft.AlertDialog(
         modal=True,
@@ -203,6 +229,21 @@ def main(page):
                 height=200,
                 width=400),
         actions=[model_button_login_dl],
+    )
+
+    start_modal = ft.AlertDialog(
+        open=True,
+        modal=True,
+        title=start_title_text,
+        content=ft.Column(
+            [ft.Row([login_text, login_task]),
+             ft.Row([pass_text, password_task]),
+             error_login_text],
+            spacing=10,
+            height=200,
+            width=400 
+        ),
+        actions=[login_button],
     )
     
     settings_b = ft.IconButton(ft.icons.SETTINGS, on_click=settings)
@@ -235,6 +276,7 @@ def main(page):
     page.on_resize = page_resize
 
     page.add(
+        start_modal,
 
         ft.Row(controls=[ft.WindowDragArea(
             ft.Text("Eva"+" Alfa0.0.1", weight=900), expand=True),
@@ -258,6 +300,13 @@ def main(page):
                 ),
                 clear_b
                 ], width=400),)
+    
+
+    if settings_par["auth"] == True:
+        start_modal.open = False
+    else:
+        start_modal.open = True
+
     if settings_par["language"] == True:
         ru()
         lang_b.data = False
