@@ -124,9 +124,20 @@ def main(page):
 
 
     def login_form_close(e):
-        page.dialog = settings_modal
-        settings_modal.open = True
-        page.update()
+        if auth.is_key_true(key_task.value) == True:
+            page.dialog = settings_modal
+            settings_modal.open = True
+            page.update()
+        elif key_task.value == "":
+            page.dialog = settings_modal
+            settings_modal.open = True
+            page.update()
+        else:
+            if settings_par["language"] == True:
+                error_key_text.value = "Неправельный ключ"
+            else:
+                error_key_text.value = "Incorrect key"
+            error_key_text.update()
 
 
     def help(e):
@@ -146,7 +157,7 @@ def main(page):
         page.update()
 
     def authe(e):
-        if auth.authatification(login_task.value, password_task.value) == True:
+        if auth.authentication(login_task.value, password_task.value) == True:
             parametrs["auth"] = True
             with open("settings.json", "w", encoding="utf-8") as file:
                 json.dump(parametrs, file)
@@ -200,7 +211,7 @@ def main(page):
     login_text = ft.Text("Введите ваше имя: ")
     pass_text = ft.Text("Пароль")
     error_login_text = ft.Text("", color=ft.colors.RED)
-
+    error_key_text = ft.Text("", color=ft.colors.RED)
 
     settings_modal = ft.AlertDialog(
         modal=True,
@@ -224,7 +235,8 @@ def main(page):
         content=ft.Column(
                 [ft.Row([login_text, name_task]),
                  ft.Row([]),
-                 ft.Row([key_text, key_task])],
+                 ft.Row([key_text, key_task]),
+                 error_key_text],
                 spacing=10,
                 height=200,
                 width=400),

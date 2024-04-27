@@ -8,6 +8,7 @@ from keras.models import Model
 from keras.layers import Add
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
+from keras.losses import SparseCategoricalCrossentropy
 import json
 import pickle
 
@@ -89,7 +90,7 @@ feed_forward_dimension = 2048
 chatbot_model = transformer_chatbot_model(input_dim=1000, num_heads=num_attention_heads, ff_dim=feed_forward_dimension,
                                           max_seq_len=max_seq_len, vocab_size=vocab_size)
 
-chatbot_model.compile(optimizer='adam', loss=tf.compat.v1.losses.sparse_softmax_cross_entropy, metrics=['accuracy'])
+chatbot_model.compile(optimizer='adam', loss="sparse_categorical_crossentropy", metrics=['accuracy'])
 
 # Обучение модели
 history = chatbot_model.fit([questions_padded, answers_padded], answers_padded, epochs=10, batch_size=64, validation_split=0.2)
