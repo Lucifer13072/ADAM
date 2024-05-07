@@ -124,7 +124,7 @@ def main(page):
 
 
     def login_form_close(e):
-        if auth.is_key_true(key_task.value) == True:
+        if auth.is_key_valid(parametrs["login"], key_task.value) == True:
             page.dialog = settings_modal
             settings_modal.open = True
             page.update()
@@ -157,8 +157,9 @@ def main(page):
         page.update()
 
     def authe(e):
-        if auth.authentication(login_task.value, password_task.value) == True:
+        if auth.authenticate_user(login_task.value, password_task.value) == True:
             parametrs["auth"] = True
+            parametrs["login"] = login_task.value
             with open("settings.json", "w", encoding="utf-8") as file:
                 json.dump(parametrs, file)
             
