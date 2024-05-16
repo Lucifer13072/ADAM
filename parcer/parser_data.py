@@ -28,7 +28,7 @@ def generate_answer(text):
         content=""
         )
     ]
-    messages.append(HumanMessage(content= "Сосотавь вопрос по тексту: "+text))
+    messages.append(HumanMessage(content= "Составь вопрос по тексту: "+text))
     res = chat(messages)
     messages.append(res)
     return res.content
